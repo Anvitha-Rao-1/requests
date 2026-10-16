@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+client/node_modules/
+Server/node_modules/
+
+# Environment secrets — NEVER commit these
+.env
+client/.env
+Server/.env
+
+# Build output
+client/dist/
+
+# Editor / OS junk
+.DS_Store
+*.log
