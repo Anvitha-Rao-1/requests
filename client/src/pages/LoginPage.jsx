@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { saveAuth } from "../auth";
+import Star from "../components/star";
 
 function LoginPage() {
       const navigate = useNavigate();
@@ -61,7 +62,7 @@ function LoginPage() {
       <div className="auth-card">
         {/* Brand at the top of the card, links back home */}
         <Link to="/" className="brand" style={{ justifyContent: "center", marginBottom: "24px" }}>
-          <span className="brand-mark">RO</span>
+          <span className="brand-mark"><Star size={22} /></span>
           <span className="brand-name">Requests Office</span>
         </Link>
 

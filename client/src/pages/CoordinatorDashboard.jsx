@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getUser, logout } from "../auth";
 import { api } from "../api";
 import { statusInfo } from "../statusLabels";
+import Star from "../components/star";
 
 function CoordinatorDashboard() {
   const user = getUser();
@@ -61,7 +62,7 @@ function CoordinatorDashboard() {
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="brand" style={{ marginBottom: "32px" }}>
-          <span className="brand-mark">RO</span>
+         <span className="brand-mark"><Star size={22} /></span>
           <span className="brand-name">Requests Office</span>
         </div>
         <nav className="side-nav">

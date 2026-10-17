@@ -4,6 +4,7 @@ import { getUser, logout } from "../auth";
 import { api } from "../api";
 import { statusInfo } from "../statusLabels";
 import NewRequestModal from "../components/NewRequestModal";
+import Star from "../components/star";
 
 function RequesterDashboard() {
   const user = getUser();
@@ -44,7 +45,7 @@ function RequesterDashboard() {
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="brand" style={{ marginBottom: "32px" }}>
-          <span className="brand-mark">RO</span>
+          <span className="brand-mark"><Star size={22} /></span>
           <span className="brand-name">Requests Office</span>
         </div>
         <nav className="side-nav">

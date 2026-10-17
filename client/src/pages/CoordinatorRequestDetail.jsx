@@ -3,10 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { statusInfo } from "../statusLabels";
 import HistoryTimeline from "../components/HistoryTimeline";
-
+import Documents from "../components/Documents";
 
 function CoordinatorRequestDetail() {
-  // useParams reads the :id from the URL (/coordinator/request/:id).
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -16,11 +15,11 @@ function CoordinatorRequestDetail() {
   const [actionError, setActionError] = useState("");
   const [correctionNote, setCorrectionNote] = useState("");
   const [busy, setBusy] = useState(false);
-    const [decisionText, setDecisionText] = useState("");
+  const [decisionText, setDecisionText] = useState("");
 
   useEffect(() => {
     loadRequest();
-  }, [id]); // reload if the id changes
+  }, [id]);
 
   async function loadRequest() {
     setLoading(true);
@@ -35,7 +34,6 @@ function CoordinatorRequestDetail() {
     }
   }
 
-  // Generic action runner: calls an endpoint, updates the request with the result.
   async function runAction(path, body) {
     setActionError("");
     setBusy(true);
@@ -44,9 +42,9 @@ function CoordinatorRequestDetail() {
         method: "PATCH",
         body: body ? JSON.stringify(body) : undefined,
       });
-      setRequest(updated);       // refresh with the new state
-      setCorrectionNote("");   
-            setDecisionText("");  // clear the note field
+      setRequest(updated);
+      setCorrectionNote("");
+      setDecisionText("");
     } catch (err) {
       setActionError(err.message);
     } finally {
@@ -62,13 +60,12 @@ function CoordinatorRequestDetail() {
 
   return (
     <div className="detail-wrap">
-      {/* Back link */}
       <button className="btn btn-secondary" onClick={() => navigate("/coordinator")} style={{ marginBottom: "24px" }}>
         ← Back to all requests
       </button>
 
       <div className="detail-grid">
-        {/* LEFT: request details + actions */}
+        {/* LEFT: request details + documents + actions */}
         <div>
           <div className="detail-card">
             <div className="request-card-top">
@@ -88,94 +85,102 @@ function CoordinatorRequestDetail() {
             </dl>
           </div>
 
-          {/* ACTIONS */}
+          {/* DOCUMENTS */}
           <div className="detail-card">
-            <h3 style={{ marginBottom: "16px" }}>Actions</h3>
-            {actionError && <div className="form-error">{actionError}</div>}
+            <Documents
+              request={request}
+              canUpload={true}
+              onUpdated={(updated) => setRequest(updated)}
+            />
+          </div>
 
-            {/* Start review — only shown when submitted */}
+          {/* ACTIONS — one clear step at a time */}
+          <div className="detail-card">
+            <h3 style={{ marginBottom: "4px" }}>What to do now</h3>
+            {actionError && <div className="form-error" style={{ marginTop: "12px" }}>{actionError}</div>}
+
+            {/* SUBMITTED → start checking */}
             {request.status === "submitted" && (
-              <button className="btn btn-primary" style={{ width: "100%", marginBottom: "12px" }}
-                disabled={busy} onClick={() => runAction("review")}>
-                Start office check
-              </button>
-            )}
-
-            {/* Forward — only when under office check */}
-            {request.status === "under_office_check" && (
-              <button className="btn btn-primary" style={{ width: "100%", marginBottom: "12px" }}
-                disabled={busy} onClick={() => runAction("forward")}>
-                Forward to specialist
-              </button>
-            )}
-
-            {/* Request correction — available at a few stages */}
-            {["submitted", "under_office_check", "with_specialist"].includes(request.status) && (
-              <div>
-                <textarea className="input" rows="3" placeholder="What needs correcting?"
-                  value={correctionNote} onChange={(e) => setCorrectionNote(e.target.value)}
-                  style={{ marginBottom: "8px", resize: "vertical" }} />
-                <button className="btn btn-secondary" style={{ width: "100%" }}
-                  disabled={busy || !correctionNote.trim()}
-                  onClick={() => runAction("request-correction", { note: correctionNote })}>
-                  Request correction
+              <>
+                <p className="action-guide">This request is new. Start checking it, then decide whether to send it to the specialist or ask the requester to fix something.</p>
+                <button className="btn btn-primary act-btn" disabled={busy} onClick={() => runAction("review")}>
+                  Start checking this request
                 </button>
-              </div>
+              </>
             )}
 
-                       {/* Communicate a decision — available after office check or specialist review */}
-            {["under_office_check", "decision_made"].includes(request.status) && (
-              <div style={{ marginTop: "12px" }}>
-                {/* Show the specialist's recommendation if there is one, to inform the decision */}
+            {/* UNDER OFFICE CHECK → forward, correct, or decide */}
+            {request.status === "under_office_check" && (
+              <>
+                <p className="action-guide">You're checking this request. Choose one:</p>
+                <button className="btn btn-primary act-btn" disabled={busy} onClick={() => runAction("forward")}>
+                  Send to specialist for expert review
+                </button>
+
+                <div className="act-divider">or communicate a decision directly</div>
+                <textarea className="input" rows="2" placeholder="Write the decision for the requester"
+                  value={decisionText} onChange={(e) => setDecisionText(e.target.value)} style={{ marginBottom: "8px", resize: "vertical" }} />
+                <button className="btn btn-secondary act-btn" disabled={busy || !decisionText.trim()}
+                  onClick={() => runAction("decision", { decision: decisionText })}>
+                  Send this decision
+                </button>
+
+                <div className="act-divider">or send back to fix something</div>
+                <textarea className="input" rows="2" placeholder="What does the requester need to correct?"
+                  value={correctionNote} onChange={(e) => setCorrectionNote(e.target.value)} style={{ marginBottom: "8px", resize: "vertical" }} />
+                <button className="btn btn-secondary act-btn" disabled={busy || !correctionNote.trim()}
+                  onClick={() => runAction("request-correction", { note: correctionNote })}>
+                  Ask requester to correct
+                </button>
+              </>
+            )}
+
+            {/* WITH SPECIALIST → waiting */}
+            {request.status === "with_specialist" && (
+              <p className="action-guide">This is with the specialist for expert review. Wait for their recommendation.</p>
+            )}
+
+            {/* DECISION MADE → relay decision + close after acknowledgement */}
+            {request.status === "decision_made" && (
+              <>
                 {request.recommendation && (
-                  <div className="callout callout-indigo" style={{ marginBottom: "12px" }}>
+                  <div className="callout callout-indigo" style={{ margin: "12px 0" }}>
                     <strong>Specialist's recommendation:</strong>
                     <p>{request.recommendation}</p>
                   </div>
                 )}
-                <textarea className="input" rows="3" placeholder="Write the decision to communicate to the requester"
-                  value={decisionText} onChange={(e) => setDecisionText(e.target.value)}
-                  style={{ marginBottom: "8px", resize: "vertical" }} />
-                <button className="btn btn-primary" style={{ width: "100%" }}
-                  disabled={busy || !decisionText.trim()}
-                  onClick={() => runAction("decision", { decision: decisionText })}>
-                  {request.decision ? "Update decision" : "Communicate decision"}
-                </button>
-              </div>
-            )}
-
-            {/* Acknowledgement status + close */}
-            {request.status === "decision_made" && (
-              <div style={{ marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--gray-200)" }}>
-                {request.acknowledged ? (
+                {!request.decision ? (
                   <>
-                    <p style={{ color: "var(--green)", fontWeight: 600, marginBottom: "8px" }}>
-                      ✓ Requester has acknowledged the decision.
-                    </p>
-                    <button className="btn btn-primary" style={{ width: "100%" }}
-                      disabled={busy} onClick={() => runAction("close")}>
-                      Close request
+                    <p className="action-guide">The specialist has given their recommendation. Write the final decision to send to the requester.</p>
+                    <textarea className="input" rows="2" placeholder="Write the decision for the requester"
+                      value={decisionText} onChange={(e) => setDecisionText(e.target.value)} style={{ marginBottom: "8px", resize: "vertical" }} />
+                    <button className="btn btn-primary act-btn" disabled={busy || !decisionText.trim()}
+                      onClick={() => runAction("decision", { decision: decisionText })}>
+                      Send decision to requester
+                    </button>
+                  </>
+                ) : request.acknowledged ? (
+                  <>
+                    <p className="action-guide" style={{ color: "#86EFAC" }}>✓ The requester has seen the decision. You can close this request.</p>
+                    <button className="btn btn-primary act-btn" disabled={busy} onClick={() => runAction("close")}>
+                      Close this request
                     </button>
                   </>
                 ) : (
-                  <p style={{ color: "var(--gray-600)", fontSize: "0.9rem" }}>
-                    Waiting for the requester to acknowledge before this can be closed.
-                  </p>
+                  <p className="action-guide">Decision sent. Waiting for the requester to confirm they've seen it before you can close.</p>
                 )}
-              </div>
+              </>
             )}
 
-            {/* Needs correction — informational */}
+            {/* NEEDS CORRECTION → waiting on requester */}
             {request.status === "needs_correction" && (
-              <p style={{ color: "var(--gray-600)", fontSize: "0.9rem", marginTop: "12px" }}>
-                Waiting on the requester's correction.
-              </p>
+              <p className="action-guide">Waiting for the requester to make the correction and resubmit.</p>
             )}
 
-            {/* Closed */}
+            {/* CLOSED */}
             {request.status === "closed" && (
               <div className="callout callout-green" style={{ marginTop: "12px" }}>
-                <strong>This request is closed.</strong>
+                <strong>This request is closed. Nothing more to do.</strong>
               </div>
             )}
           </div>

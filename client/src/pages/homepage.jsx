@@ -1,6 +1,7 @@
 // HomePage is the public landing page shown before login.
 // It's a function component that returns the page markup.
 import { Link } from "react-router-dom";
+import Star from "../components/star";
 
 // HomePage is the public landing page shown before login.
 // It's a function component that returns the page markup.
@@ -12,7 +13,7 @@ function HomePage() {
         <div className="navbar-inner">
           {/* Brand mark: a small logo box + the name */}
           <div className="brand">
-            <span className="brand-mark">RO</span>
+            <span className="brand-mark"><Star size={22} /></span>
             <span className="brand-name">Requests Office</span>
           </div>
 
@@ -116,7 +117,7 @@ function HomePage() {
       <footer className="footer">
         <div className="footer-inner">
           <div className="brand">
-            <span className="brand-mark">RO</span>
+            <span className="brand-mark"><Star size={22} /></span>
             <span className="brand-name">Requests Office</span>
           </div>
           <p>Monday–Friday, 9:30 AM – 4:30 PM · 080 0000 0000</p>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api";
+import Star from "../components/star";
+import Documents from "../components/Documents";
 
 function SpecialistRequestDetail() {
   const { id } = useParams();
@@ -38,7 +40,6 @@ function SpecialistRequestDetail() {
         method: "PATCH",
         body: JSON.stringify({ recommendation }),
       });
-      // Done — back to the queue.
       navigate("/specialist");
     } catch (err) {
       setActionError(err.message);
@@ -69,7 +70,7 @@ function SpecialistRequestDetail() {
     <div className="spec-wrap">
       <header className="spec-header">
         <div className="brand">
-          <span className="brand-mark">RO</span>
+          <span className="brand-mark"><Star size={22} /></span>
           <span className="brand-name">Requests Office</span>
         </div>
         <button className="btn btn-secondary" onClick={() => navigate("/specialist")}>← Back to queue</button>
@@ -85,6 +86,11 @@ function SpecialistRequestDetail() {
           <div className="spec-detail-row"><span>Campus</span><strong style={{ textTransform: "capitalize" }}>{request.campus}</strong></div>
           <div className="spec-detail-row"><span>Department</span><strong>{request.department || "—"}</strong></div>
           <div className="spec-detail-row"><span>Amount</span><strong>{request.amount > 0 ? `₹${request.amount.toLocaleString("en-IN")}` : "—"}</strong></div>
+        </div>
+
+        {/* Documents the specialist reviews — view only, no upload */}
+        <div className="spec-action-block" style={{ marginBottom: "20px" }}>
+          <Documents request={request} canUpload={false} onUpdated={() => {}} />
         </div>
 
         {actionError && <div className="form-error">{actionError}</div>}

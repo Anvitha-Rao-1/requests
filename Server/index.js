@@ -26,7 +26,17 @@ app.get("/api/health", (req, res) => {
 
 // The port the server listens on. 5000 is a common choice for dev backends.
 const PORT = 5000;
-
+// Catch multer/upload errors and return a clear message instead of a 500.
+app.use((err, req, res, next) => {
+  if (err.message && (err.message.includes("Only PDF") || err.message.includes("File too large"))) {
+    return res.status(400).json({ message: err.message });
+  }
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({ message: "File must be under 10 MB" });
+  }
+  console.error("Unhandled error:", err.message);
+  res.status(500).json({ message: "Server error" });
+});
 // Start the server and print a confirmation once it's listening.
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

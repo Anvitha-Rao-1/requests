@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, logout } from "../auth";
 import { api } from "../api";
+import Star from "../components/star";
 
 function SpecialistDashboard() {
   const user = getUser();
@@ -38,7 +39,7 @@ function SpecialistDashboard() {
       {/* Simple top bar instead of a sidebar — less to navigate */}
       <header className="spec-header">
         <div className="brand">
-          <span className="brand-mark">RO</span>
+         <span className="brand-mark"><Star size={22} /></span>
           <span className="brand-name">Requests Office</span>
         </div>
         <div className="spec-header-right">

@@ -2,6 +2,7 @@ import express from "express";
 import Request from "../models/request.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import User from "../models/user.js";
+import { upload } from "../config/cloudinary.js";
 
 const router = express.Router();
 
@@ -394,6 +395,63 @@ router.patch("/:id/close", requireAuth, requireRole("coordinator"), async (req, 
     res.json(request);
   } catch (error) {
     console.error("Close error:", error.message);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+// POST /api/requests/:id/documents  — upload a document to a request.
+// upload.single("file") processes ONE file from a field named "file".
+// It runs BEFORE our handler: validates type/size, uploads to Cloudinary.
+router.post("/:id/documents", requireAuth, upload.single("file"), async (req, res) => {
+  try {
+    // If no file came through (or it was rejected), multer leaves req.file empty.
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const request = await Request.findById(req.params.id);
+    if (!request) return res.status(404).json({ message: "Request not found" });
+
+    // Permission: requester can only upload to their own request; coordinator can upload (walk-ins later).
+    if (
+      req.user.role === "requester" &&
+      request.requester.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    // Work out the version: count existing docs with the same label + 1,
+    // or just the next number overall. Simple: next version = current count + 1.
+    // Old requests created before the documents field may not have the array yet.
+if (!request.documents) request.documents = [];
+const version = request.documents.length + 1;
+
+    // Figure out a simple file-type label from the mimetype.
+    const typeMap = { "application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png" };
+
+    // Build the document record from what Cloudinary returned (on req.file).
+    const doc = {
+      label: req.body.label || "Document",
+      url: req.file.path,            // Cloudinary gives the URL here
+      publicId: req.file.filename,   // and the public id here
+      originalName: req.file.originalname,
+      fileType: typeMap[req.file.mimetype] || "file",
+      version,
+      uploadedBy: req.user.name,
+      uploadedAt: new Date(),
+    };
+
+        request.documents.push(doc);
+    request.markModified("documents");
+    request.history.push({
+      action: "Document uploaded",
+      by: req.user.name,
+      note: doc.label,
+      at: new Date(),
+    });
+    await request.save();
+    res.status(201).json(request);
+  } catch (error) {
+    console.error("Upload error:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 });

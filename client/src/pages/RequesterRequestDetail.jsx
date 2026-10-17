@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { statusInfo } from "../statusLabels";
 import HistoryTimeline from "../components/HistoryTimeline";
+import Documents from "../components/Documents";
 
 function RequesterRequestDetail() {
   const { id } = useParams();
@@ -83,6 +84,15 @@ function RequesterRequestDetail() {
             </dl>
           </div>
 
+          {/* DOCUMENTS — requester can upload when submitted or needs correction */}
+          <div className="detail-card">
+            <Documents
+              request={request}
+              canUpload={["submitted", "under_office_check", "needs_correction"].includes(request.status)}
+              onUpdated={(updated) => setRequest(updated)}
+            />
+          </div>
+
           {/* CONTEXT-AWARE ACTIONS */}
           <div className="detail-card">
             <h3 style={{ marginBottom: "16px" }}>What you can do</h3>
@@ -125,14 +135,14 @@ function RequesterRequestDetail() {
 
             {/* DECISION MADE, acknowledged → waiting for closure */}
             {request.status === "decision_made" && request.acknowledged && (
-              <p style={{ color: "var(--gray-600)" }}>
+              <p style={{ color: "rgba(255,255,255,0.65)" }}>
                 You've acknowledged the decision. The office will close this request shortly.
               </p>
             )}
 
             {/* Other statuses → informational */}
             {["submitted", "under_office_check", "with_specialist"].includes(request.status) && (
-              <p style={{ color: "var(--gray-600)" }}>
+              <p style={{ color: "rgba(255,255,255,0.65)" }}>
                 Your request is being processed. We'll let you know if anything is needed.
               </p>
             )}

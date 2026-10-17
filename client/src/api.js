@@ -27,3 +27,22 @@ export async function api(path, options = {}) {
 
   return data;
 }
+// Upload a file (multipart/form-data). Separate from api() because files
+// aren't JSON — we send FormData and must NOT set Content-Type (the browser
+// sets it with the correct multipart boundary automatically).
+export async function uploadFile(path, file, label) {
+  const token = getToken();
+
+  const formData = new FormData();
+  formData.append("file", file);       // must match upload.single("file") on the backend
+  if (label) formData.append("label", label);
+
+  const headers = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  // Note: NO Content-Type header — the browser adds it with the boundary.
+
+  const response = await fetch(path, { method: "POST", headers, body: formData });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message || "Upload failed");
+  return data;
+}
