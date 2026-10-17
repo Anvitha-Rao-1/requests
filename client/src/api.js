@@ -2,7 +2,7 @@ import { getToken } from "./auth";
 
 // In production this is set to the Render backend URL (via VITE_API_URL on Vercel).
 // In local dev it's empty, so requests go to "/api/..." and Vite's proxy forwards them.
-const API_BASE = "https://requests-ea3c.onrender.com";
+const API_BASE = "https://requests-ea3c.onrender.com"; // backend
 
 // Wrapper around fetch that adds the auth token and handles JSON.
 export async function api(path, options = {}) {
