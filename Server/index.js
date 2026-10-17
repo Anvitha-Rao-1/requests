@@ -11,7 +11,12 @@ const app = express();
 
 // Middleware: a function that runs on every incoming request.
 // cors() adds headers that tell the browser "requests from other origins are OK."
-app.use(cors());
+// Allow the frontend (and local dev) to call this API, including preflight.
+app.use(cors({
+  origin: true,          // reflect the request origin (allows any)
+  credentials: true,
+  methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+}));
 
 // Lets Express read JSON in request bodies (used later for login, forms, etc.).
 app.use(express.json());
