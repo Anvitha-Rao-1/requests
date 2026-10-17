@@ -30,7 +30,7 @@ app.get("/api/health", (req, res) => {
 });
 
 // The port the server listens on. 5000 is a common choice for dev backends.
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 // Catch multer/upload errors and return a clear message instead of a 500.
 app.use((err, req, res, next) => {
   if (err.message && (err.message.includes("Only PDF") || err.message.includes("File too large"))) {
