@@ -42,6 +42,20 @@ app.use((err, req, res, next) => {
   console.error("Unhandled error:", err.message);
   res.status(500).json({ message: "Server error" });
 });
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Needed for __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve the built React app from server
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+// Any route not starting with /api → serve React's index.html (SPA routing)
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
 // Start the server and print a confirmation once it's listening.
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
