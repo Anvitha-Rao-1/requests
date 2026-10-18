@@ -5,7 +5,7 @@ import { saveAuth } from "../auth";
 import Star from "../components/star";
 
 function LoginPage() {
-      const navigate = useNavigate();
+  const navigate = useNavigate();
   // Form field values.
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,8 +24,8 @@ function LoginPage() {
       // fetch() makes an HTTP request from the browser.
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" }, // we're sending JSON
-        body: JSON.stringify({ email, password }),        // turn our data into a JSON string
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
       // Parse the JSON the server sent back.
@@ -33,21 +33,17 @@ function LoginPage() {
 
       // response.ok is true for status 200–299. If not, it was a 400/401/500.
       if (!response.ok) {
-        // Show the server's message (e.g. "Invalid credentials").
         setError(data.message || "Login failed");
         return;
       }
 
-      // Success: we have data.token and data.user.
-      // For now, just prove it worked. We'll store it properly in 13c.
-            // Success: store the login so the app remembers us.
+      // Success: store the login so the app remembers us.
       saveAuth(data.token, data.user);
 
       // Send the user to the dashboard that matches their role.
       if (data.user.role === "requester") navigate("/requester");
       else if (data.user.role === "coordinator") navigate("/coordinator");
       else if (data.user.role === "specialist") navigate("/specialist");
-      
     } catch (err) {
       // This catch fires for network failures (server down, no connection).
       setError("Could not reach the server. Is it running?");
@@ -72,8 +68,6 @@ function LoginPage() {
         <form onSubmit={handleSubmit}>
           {/* Show an error banner only when error state is non-empty. */}
           {error && <div className="form-error">{error}</div>}
-
-          
 
           {/* EMAIL FIELD */}
           <label className="field">
@@ -110,6 +104,11 @@ function LoginPage() {
             {loading ? "Logging in..." : "Log in"}
           </button>
         </form>
+
+        {/* Link to the registration page */}
+        <p style={{ textAlign: "center", marginTop: "16px", fontSize: "0.9rem" }}>
+          New here? <Link to="/register" style={{ color: "var(--indigo)", fontWeight: 600 }}>Create an account</Link>
+        </p>
       </div>
     </div>
   );

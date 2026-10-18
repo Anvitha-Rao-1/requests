@@ -8,6 +8,7 @@ import SpecialistDashboard from "./pages/SpecialistDashboard";
 import CoordinatorRequestDetail from "./pages/CoordinatorRequestDetail";
 import SpecialistRequestDetail from "./pages/SpecialistRequestDetail";
 import RequesterRequestDetail from "./pages/RequesterRequestDetail";
+import RegisterPage from "./pages/RegisterPage";
 function App() {
   return (
     <BrowserRouter>
@@ -21,6 +22,7 @@ function App() {
         <Route path="/coordinator/request/:id" element={<CoordinatorRequestDetail />} />
         <Route path="/specialist/request/:id" element={<SpecialistRequestDetail />} />
         <Route path="/requester/request/:id" element={<RequesterRequestDetail />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Routes>
     </BrowserRouter>
   );
